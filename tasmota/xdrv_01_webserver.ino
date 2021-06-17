@@ -1788,6 +1788,8 @@ void HandleWifiConfiguration(void) {
 
   AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HTTP D_CONFIGURE_WIFI));
 
+  TasmotaGlobal.global_state.wifi_connecting = 0;     // Hoaloha robotics: blink when connecting
+
   if (Webserver->hasArg(F("save")) && HTTP_MANAGER_RESET_ONLY != Web.state) {
     if ( WifiIsInManagerMode() ) {
       // Test WIFI Connection to Router
@@ -1805,6 +1807,7 @@ void HandleWifiConfiguration(void) {
       TasmotaGlobal.sleep = 0;                           // Disable sleep
       TasmotaGlobal.restart_flag = 0;                    // No restart
       TasmotaGlobal.ota_state_flag = 0;                  // No OTA
+      TasmotaGlobal.global_state.wifi_connecting = 1;     // Hoaloha robotics: blink when connecting
 //      TasmotaGlobal.blinks = 0;                          // Disable blinks initiated by WifiManager
 
       WebGetArg(PSTR("s1"), tmp, sizeof(tmp));   // SSID1
@@ -2971,11 +2974,12 @@ bool CaptivePortal(void)
 {
   // Possible hostHeader: connectivitycheck.gstatic.com or 192.168.4.1
   if ((WifiIsInManagerMode()) && !ValidIpAddress(Webserver->hostHeader().c_str())) {
-    AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HTTP D_REDIRECTED));
+    // Commented to remove CaptivePortal functionality
+    // AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_HTTP D_REDIRECTED));
 
-    Webserver->sendHeader(F("Location"), String(F("http://")) + Webserver->client().localIP().toString(), true);
-    WSSend(302, CT_PLAIN, "");  // Empty content inhibits Content-length header so we have to close the socket ourselves.
-    Webserver->client().stop();  // Stop is needed because we sent no content length
+    // Webserver->sendHeader(F("Location"), String(F("http://")) + Webserver->client().localIP().toString(), true);
+    // WSSend(302, CT_PLAIN, "");  // Empty content inhibits Content-length header so we have to close the socket ourselves.
+    // Webserver->client().stop();  // Stop is needed because we sent no content length
     return true;
   }
   return false;

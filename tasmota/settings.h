@@ -855,7 +855,7 @@ typedef union {
     uint8_t mqtt_down : 1;
     uint8_t wifi_down : 1;
     uint8_t eth_down : 1;
-    uint8_t spare04 : 1;
+    uint8_t wifi_connecting : 1;
     uint8_t spare05 : 1;
     uint8_t spare06 : 1;
     uint8_t spare07 : 1;

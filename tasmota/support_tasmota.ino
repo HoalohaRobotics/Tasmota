@@ -1038,16 +1038,19 @@ void Every250mSeconds(void)
   TasmotaGlobal.state_250mS &= 0x3;
 
   TasmotaGlobal.global_state.network_down = (TasmotaGlobal.global_state.wifi_down && TasmotaGlobal.global_state.eth_down) ? 1 : 0;
+  TasmotaGlobal.global_state.wifi_connecting = !TasmotaGlobal.global_state.network_down? 0 : TasmotaGlobal.global_state.wifi_connecting; // if its 0, set wifi connecting to 0, else leave it alone 
 
   if (!Settings->flag.global_state) {                      // SetOption31 - Control link led blinking
     if (TasmotaGlobal.global_state.data &0x03) {                        // Network or MQTT problem
-      if (TasmotaGlobal.global_state.mqtt_down) { blinkinterval = 7; }  // MQTT problem so blink every 2 seconds (slowest)
-      if (TasmotaGlobal.global_state.network_down) { blinkinterval = 3; }  // Network problem so blink every second (slow)
+      // if (TasmotaGlobal.global_state.mqtt_down) { blinkinterval = 7; }  // MQTT problem so blink every 2 seconds (slowest)
+      // if (TasmotaGlobal.global_state.network_down) { blinkinterval = 3; }  // Network problem so blink every second (slow)
+      if (TasmotaGlobal.global_state.network_down) { blinkinterval = 8; }  // network down so blink every 2 seconds (slowest)
+      if (TasmotaGlobal.global_state.wifi_connecting) { blinkinterval = 2; } // connecting to network so blink every 0.5 second (slow) 
       TasmotaGlobal.blinks = 201;                         // Allow only a single blink in case the problem is solved
     }
   }
-  if (TasmotaGlobal.blinks || TasmotaGlobal.restart_flag || TasmotaGlobal.ota_state_flag) {
-    if (TasmotaGlobal.restart_flag || TasmotaGlobal.ota_state_flag) {  // Overrule blinks and keep led lit
+  if (TasmotaGlobal.blinks || TasmotaGlobal.restart_flag || TasmotaGlobal.ota_state_flag || !TasmotaGlobal.global_state.network_down) {
+    if (TasmotaGlobal.restart_flag || TasmotaGlobal.ota_state_flag || !TasmotaGlobal.global_state.network_down) {  // Overrule blinks and keep led lit
       TasmotaGlobal.blinkstate = true;                                  // Stay lit
     } else {
       blinkspeed--;
